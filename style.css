@@ -116,11 +116,12 @@ body {
 }
 
 /* 分数的样式 */
+
 #ui .score-ui{
     width: 120px;
     height: 40px;
-    margin-left: 20px;
     line-height: 40px;
+    margin-left: 20px;
     border-bottom: solid 2px #40c061;
     padding: 5px;
 }
@@ -135,7 +136,11 @@ body {
     position: absolute;
     left: 80px;
 }
-
+/* 关卡样式 */
+#ui .score-ui.level span{ 
+    left: 50px;
+    
+}
 /* 病毒的样式 */
 .virus {
     width: 80px;
@@ -226,4 +231,5 @@ body {
 #game-over-alert #restart-btn {
     font-size: 24px;
     margin-top: 20px;
+    cursor:pointer;
 }

@@ -9,7 +9,9 @@ let config = {
     /*病毒生成时间间隔800ms*/
     interval:800,
     /* 病毒下落动画速度 */
-    speed:3
+    speed:1,
+    /* 关卡数 */
+    level:1
 }
 /* 分数 */
 let score = 0;
@@ -118,15 +120,23 @@ function update(){
 
     for(let i = 0;i < virues.length;i++){
         let virus = virues[i];
-        virus.style.top = virus.offsetTop + config.speed + 'px'
+        /* 病毒下落速度，击中分数越多，病毒下落速度越来越快 */
+        virus.style.top = virus.offsetTop + config.speed + (score *0.3) + 'px'
 
         /* 病毒位置大于屏幕就消失 */
         if(virus.offsetTop > (winH - 200) && !uiLayer.warning ){
             showWarning()
             uiLayer.warning = true;
         }else if(virus.offsetTop >= winH){
+
+            gameOverAlert.querySelector('h1').innerText = '任务失败';
+            restartBtn.innerText = "重试本关";
             // game over
             gameOver()
+        }else if(score > 14){
+            /* 分数大于14进入下一关，关卡数自加 */
+            nextLevel();
+          
         }
     }
 }
@@ -179,13 +189,13 @@ window.addEventListener('keyup',function(e){
             game.removeChild(virus)
             virues.splice(i,1)
 
-            /* 增加分数，并修改分数显示 */
-            score++;
-            scoreLabel.innerHTML = score
-
             // 播放消灭音效
             xmEffect.currentTime = 0;
             xmEffect.play()
+
+            /* 增加分数，并修改分数显示 */
+            score++;
+            scoreLabel.innerHTML = score
 
         }
     }
@@ -200,11 +210,30 @@ restartBtn.onclick = function(){
 
 function resetGame(){
     config.status = 1;
-    score = 0;
     scoreLabel.innerHTML = score;
     game.innerHTML = ''
     virues = []
-    uiLayer.removeChild(document.querySelector('.warning'))
-    uiLayer.warning = false;
+    /* 警告页面删除时，需要删除警告页面 */
+    if(uiLayer.warning){
+        uiLayer.removeChild(document.querySelector('.warning'))
+        uiLayer.warning = false;
+    }
+    /* 关卡数自加 */
+    if(score>14){
+        config.level++;
+    }
+    /* 重新渲染关卡数 */
+    levelLabel.innerText = `第${config.level}关`;
+    score = 0;
     startGame()
+}
+/* 获取关卡标签 */
+let levelLabel = document.getElementById('level-label');
+/* 下一关卡 */
+function nextLevel(){
+    gameOverAlert.querySelector('h1').innerText = '恭喜过关';
+    restartBtn.innerText = "下一关";
+    gameOver();
+    /* 修改下一关速度初始值 */
+    config.speed *= 1.25;
 }
