@@ -111,6 +111,9 @@ function makeVirus(){
 // update 动画，刷新病毒元素的位置
 let winH =stage.offsetHeight;
 
+/* 获得ui层 */
+let uiLayer = document.getElementById("ui");
+
 function update(){
 
     for(let i = 0;i < virues.length;i++){
@@ -130,9 +133,6 @@ function update(){
 
 /* 警告功能函数 */
 
-/* 获得ui层 */
-let uiLayer = document.getElementById("id");
-
 function showWarning(){
     let warningLayer = document.createElement('div')
     warningLayer.setAttribute('class','warning')
@@ -140,7 +140,7 @@ function showWarning(){
 }
 
 /* 游戏结束 */
-let gameOverAlert = document.querySelector('#game-over-alert')
+let gameOverAlert = document.getElementById('game-over-alert')
 function gameOver(){
     clearInterval(timer)
     clearInterval(updater)
@@ -151,8 +151,8 @@ function gameOver(){
 
 /* 分数标签获取 */
 let scoreLabel = document.getElementById('score-label')
-
-let xmEffect = document.querySelector('#xm')
+/* 获取消灭音效标签 */
+let xmEffect = document.getElementById('xm')
 
 /* 监听键盘事件消灭病毒 */
 window.addEventListener('keyup',function(e){
@@ -190,3 +190,21 @@ window.addEventListener('keyup',function(e){
         }
     }
 })
+
+// 重玩
+let restartBtn = document.getElementById('restart-btn');
+restartBtn.onclick = function(){
+    gameOverAlert.style.display = 'none'
+    resetGame()
+}
+
+function resetGame(){
+    config.status = 1;
+    score = 0;
+    scoreLabel.innerHTML = score;
+    game.innerHTML = ''
+    virues = []
+    uiLayer.removeChild(document.querySelector('.warning'))
+    uiLayer.warning = false;
+    startGame()
+}
