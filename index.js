@@ -1,0 +1,192 @@
+/* 常用变量定义 */
+let config = {
+    /* 游戏状态 
+    0：游戏未开始
+    1：游戏进行中
+    2：游戏结束
+    */
+    status:0,
+    /*病毒生成时间间隔800ms*/
+    interval:800,
+    /* 病毒下落动画速度 */
+    speed:3
+}
+/* 分数 */
+let score = 0;
+/* 开始页面 */
+let startAlert = document.getElementById("start-alert");
+let gameDesc = document.querySelector(".game-desc");
+let footer = document.querySelector("#start-alert footer");
+
+startAlert.onclick = function(){
+
+    console.log("游戏开始")
+    /* 添加ui层图片移动样式 */
+    gameDesc.classList.add('slide-up');
+    footer.classList.add('slide-down');
+    /* 游戏开始后开始界面不显示 */
+    setTimeout(function(){
+        startAlert.style.display = 'none';
+    },500);
+
+    startGame();
+    /* 更新游戏状态属性 */
+    config.status = 1;
+}
+
+/* 开始游戏函数 */
+let timer,updater;
+
+function startGame(){
+    /* config.interval控制病毒生成时间 */
+    timer = setInterval(function(){
+        makeVirus();
+    },config.interval);
+
+    /* 更新病毒元素位置的定时器*/
+    updater = setInterval(function(){
+        /* 调用下落动画 */
+        update();
+    },16)
+    
+}
+
+/* 获取游戏层 */
+let game  = document.getElementById("game");
+let stage = document.getElementById("stage");
+
+let letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+    'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+]
+/* 生成病毒元素 */
+let virues = []
+function makeVirus(){
+    let virus = document.createElement('div');
+    virus.setAttribute('class','virus');
+    let p = document.createElement('p');
+    p.classList.add('letter');
+    virus.appendChild(p);
+
+    /* 随机生成字母 */
+    let letter = letters[Math.floor(Math.random()*26)];
+    p.innerHTML = letter
+    /* 随机病毒水平位置 */
+    virus.style.left = Math.random() * (stage.offsetWidth -100) + 'px';
+    /* 记录字母值异步后续监听 */
+    virus.letter =  letter;
+
+    // 设置病毒的颜色
+    switch(Math.floor(Math.random() * 6)){
+        case 0:
+            p.style.backgroundImage = 'radial-gradient(rgba(255,150,150,0),rgba(255,0,0,1))';
+            p.style.boxShadow = '0 0 15px #f00';
+            break;
+        case 1:
+            p.style.backgroundImage = 'radial-gradient(rgba(0, 255, 0, 0),rgba(0,255,0,1))';
+            p.style.boxShadow = '0 0 15px #f00'; 
+            break;
+        case 2:
+            p.style.backgroundImage = 'radial-gradient(rgba(0, 0, 255, 0),rgba(0,0,255,1))';
+            p.style.boxShadow = '0 0 15px #f00'; 
+            break;
+        case 3:
+            p.style.backgroundImage = 'radial-gradient(rgba(255, 255, 0, 0),rgba(255,255,0,1))';
+            p.style.boxShadow = '0 0 15px #f00'; 
+            break;
+        case 4:
+            p.style.backgroundImage = 'radial-gradient(rgba(0, 255, 255, 0),rgba(0,255,255,1))';
+            p.style.boxShadow = '0 0 15px #f00'; 
+            break;
+        case 5:
+            p.style.backgroundImage = 'radial-gradient(rgba(255, 0, 255, 0),rgba(255,0,255,1))';
+            p.style.boxShadow = '0 0 15px #f00'; 
+            break;
+    }
+   
+    /* 病毒插入页面 */
+    game.appendChild(virus);
+    virues.push(virus)
+}
+
+// update 动画，刷新病毒元素的位置
+let winH =stage.offsetHeight;
+
+function update(){
+
+    for(let i = 0;i < virues.length;i++){
+        let virus = virues[i];
+        virus.style.top = virus.offsetTop + config.speed + 'px'
+
+        /* 病毒位置大于屏幕就消失 */
+        if(virus.offsetTop > (winH - 200) && !uiLayer.warning ){
+            showWarning()
+            uiLayer.warning = true;
+        }else if(virus.offsetTop >= winH){
+            // game over
+            gameOver()
+        }
+    }
+}
+
+/* 警告功能函数 */
+
+/* 获得ui层 */
+let uiLayer = document.getElementById("id");
+
+function showWarning(){
+    let warningLayer = document.createElement('div')
+    warningLayer.setAttribute('class','warning')
+    uiLayer.appendChild(warningLayer)
+}
+
+/* 游戏结束 */
+let gameOverAlert = document.querySelector('#game-over-alert')
+function gameOver(){
+    clearInterval(timer)
+    clearInterval(updater)
+    config.status = 2;
+    gameOverAlert.style.display = 'block'
+}
+
+
+/* 分数标签获取 */
+let scoreLabel = document.getElementById('score-label')
+
+let xmEffect = document.querySelector('#xm')
+
+/* 监听键盘事件消灭病毒 */
+window.addEventListener('keyup',function(e){
+    let key = e.key;
+
+    for(let i = 0;i < virues.length;i++){
+        let virus = virues[i]
+
+        if(virus.letter.toLowerCase() === key.toLocaleLowerCase() && config.status === 1){
+
+            // 键盘输入与病毒virus.lette匹配切换病毒图片
+            let dieImg = document.createElement('img')
+            game.appendChild(dieImg)
+            dieImg.src = './imgs/virus-die.png'
+            dieImg.style.position = 'absolute'
+            dieImg.style.left = virus.offsetLeft + 'px'
+            dieImg.style.top = virus.offsetTop + 'px'
+            /* 病毒1s内变透明 */
+            dieImg.classList.add('fade-out')
+            /* 透明的病毒消失 */
+            setTimeout(function(){
+                game.removeChild(dieImg)
+            },1000)
+            game.removeChild(virus)
+            virues.splice(i,1)
+
+            /* 增加分数，并修改分数显示 */
+            score++;
+            scoreLabel.innerHTML = score
+
+            // 播放消灭音效
+            xmEffect.currentTime = 0;
+            xmEffect.play()
+
+        }
+    }
+})
